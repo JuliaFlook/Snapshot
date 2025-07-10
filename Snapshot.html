@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Skills Snapshot Grid (Unified)</title>
+<style>
+    body {
+      background: #f7f7f7;
+      color: #222;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2vw;
+      padding-bottom: 5vw;
+    }
+    .label {
+      font-weight: bold;
+      color: #444;
+      font-size: clamp(24px, 4vw, 48px);
+      text-align: center;
+      margin-bottom: 4vw;
+    }
+    .unified-grid-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2vw;
+      position: relative;
+    }
+    .quadrant-row {
+      display: flex;
+      gap: 2vw;
+    }
+    .quadrant {
+      flex: 1 1 0;
+      padding: 1vw;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      min-width: 0;
+    }
+    .quadrant-label {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #8bb319;
+      margin-bottom: 1vw;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .block-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1vw;
+      grid-auto-rows: 1fr;
+    }
+    .snippet-box {
+      background: #fff;
+      padding: 1vw 1vw 0 1vw;
+      border-radius: 0.8vw;
+      border: 1px solid #ccc;
+      box-shadow: 0 0.2vw 0.4vw rgba(0, 0, 0, 0.05);
+      text-align: center;
+      font-size: clamp(12px, 1vw, 14px);
+      min-width: 0;
+      word-break: break-word;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .snippet-box:hover {
+      background: #f0f0f0;
+    }
+    .snippet-icon {
+      font-size: clamp(20px, 3vw, 36px);
+      margin-bottom: 0.4vw;
+    }
+    .snippet-title {
+      font-weight: 600;
+      margin-bottom: 0.5vw;
+      font-size: clamp(14px, 1.3vw, 18px);
+      color: #7faf08 !important;
+    }
+    .snippet-box > *:last-child {
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    a.popup-link,
+    a.popup-link:visited,
+    a.popup-link:active,
+    a.popup-link:focus {
+      all: unset !important;
+      display: block !important;
+      cursor: pointer !important;
+    }
+    a.popup-link *,
+    a.popup-link *:visited,
+    a.popup-link *:active,
+    a.popup-link *:focus {
+      color: inherit !important;
+      text-decoration: none !important;
+    }
+    @media (max-width: 1000px) {
+      html, body, .unified-grid-container {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .quadrant, .block-grid, .snippet-box {
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .quadrant {
+        padding: 1em 0.5em !important;
+      }
+      .block-grid {
+        grid-template-columns: 1fr;
+        gap: 2em;
+      }
+      .snippet-box {
+        border-radius: 0.8em !important;
+        font-size: 0.95em !important;
+        word-break: break-word !important;
+        hyphens: auto;
+        padding: 1.2em 1em 1.2em 1em !important;
+        overflow-wrap: break-word !important;
+        margin: 0 !important;
+      }
+      .snippet-title {
+        font-size: 1.05em !important;
+        word-break: break-word;
+        hyphens: auto;
+        color: #7faf08 !important;
+      }
+      .snippet-icon {
+        font-size: 1.7em !important;
+      }
+      .cross-overlay {
+        display: none !important;
+      }
+      .left, .right {
+        max-width: 38vw;
+      }
+    }
+    @media (max-width: 1200px) {
+      .cross-overlay:not([style*='display: none']) .horizontal {
+        width: 60%;
+        left: 20%;
+      }
+      .cross-overlay:not([style*='display: none']) .arrow-left {
+        left: 20%;
+      }
+      .cross-overlay:not([style*='display: none']) .arrow-right {
+        right: 20%;
+      }
+    }
+    @media (max-width: 900px) {
+      .cross-overlay:not([style*='display: none']) .horizontal {
+        width: 50%;
+        left: 25%;
+      }
+      .cross-overlay:not([style*='display: none']) .arrow-left {
+        left: 25%;
+      }
+      .cross-overlay:not([style*='display: none']) .arrow-right {
+        right: 25%;
+      }
+    }
+    @media (max-width: 600px) {
+      .cross-overlay {
+        display: none !important;
+      }
+    }
+    /* Cross lines and labels overlay */
+    .cross-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .cross-overlay svg.cross-svg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .cross-label {
+      position: absolute;
+      color: #8bb319;
+      font-weight: 500;
+      font-size: clamp(14px, 1.5vw, 20px);
+      text-align: center;
+      white-space: nowrap;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .top { top: 0; left: 50%; transform: translate(-50%, -150%); }
+    .top::before { content: "✨ "; }
+    .bottom { bottom: 0; left: 50%; transform: translate(-50%, 150%); }
+    .bottom::before { content: "🧱 "; }
+    .left, .right {
+      max-width: 32vw;
+      white-space: normal;
+      line-height: 1.2;
+      padding: 0.2em 0.5em;
+      box-sizing: border-box;
+      word-break: break-word;
+    }
+    .left {
+      left: 10%;
+      top: 50%;
+      transform: translate(-100%, -50%);
+      text-align: left;
+      margin-left: 0.7em;
+    }
+    .right {
+      right: 10%;
+      top: 50%;
+      transform: translate(100%, -50%);
+      text-align: right;
+      margin-right: 0.7em;
+    }
+    @media (max-width: 700px) {
+      .left, .right {
+        max-width: 44vw;
+        font-size: 0.95em;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="label">Skills Snapshot</div>
+<div class="unified-grid-container">
+<div class="cross-overlay">
+<svg class="cross-svg" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Horizontal line with longer arrows -->
+<line stroke="#e0e0e0" stroke-width="1" x1="16" x2="84" y1="50" y2="50"></line>
+<polygon fill="#e0e0e0" points="13,50 18,48.5 18,51.5"></polygon>
+<polygon fill="#e0e0e0" points="87,50 82,48.5 82,51.5"></polygon>
+<!-- Vertical line with longer arrows -->
+<line stroke="#e0e0e0" stroke-width="1" x1="50" x2="50" y1="16" y2="84"></line>
+<polygon fill="#e0e0e0" points="50,13 48.5,18 51.5,18"></polygon>
+<polygon fill="#e0e0e0" points="50,87 48.5,82 51.5,82"></polygon>
+</svg>
+<div class="cross-label top">TRANSFORMATIVE</div>
+<div class="cross-label bottom">FOUNDATIONAL</div>
+<div class="cross-label left">⚙️ BEHIND THE SCENES</div>
+<div class="cross-label right">🌟 VISIBLE IMPACT</div>
+</div>
+<div class="quadrant-row">
+<div class="quadrant">
+<div class="block-grid">
+<a class="popup-link" href="a1.html"><div class="snippet-box"><div class="snippet-icon">🧠</div><div class="snippet-title">Systems Thinker</div><p>Connected pedagogy, tools, user needs, and strategy into a scalable, elegant system.</p></div></a>
+<a class="popup-link" href="a2.html"><div class="snippet-box"><div class="snippet-icon">🧩</div><div class="snippet-title">Interface Refiner</div><p>Refined page structure and formatting to boost clarity, reduce confusion, and guide attention.</p></div></a>
+<a class="popup-link" href="a3.html"><div class="snippet-box"><div class="snippet-icon">⚙️</div><div class="snippet-title">Workflow Automation</div><p>Streamlined setup using logic, auto-formatting, and reusable efficiencies.</p></div></a>
+<a class="popup-link" href="a4.html"><div class="snippet-box"><div class="snippet-icon">🔄</div><div class="snippet-title">Flow Optimizer</div><p>Eliminated friction points to keep learning smooth, focused, and uninterrupted.</p></div></a>
+</div>
+</div>
+<div class="quadrant">
+<div class="block-grid">
+<a class="popup-link" href="b1.html"><div class="snippet-box"><div class="snippet-icon">🧭</div><div class="snippet-title">Navigation Clarity</div><p>Streamlined course flow to keep students confident, oriented, and on track.</p></div></a>
+<a class="popup-link" href="b2.html"><div class="snippet-box"><div class="snippet-icon">🔍</div><div class="snippet-title">Visual Identifiers</div><p>Designed cues that made key content instantly visible and intuitive.</p></div></a>
+<a class="popup-link" href="b3.html"><div class="snippet-box"><div class="snippet-icon">💡</div><div class="snippet-title">Creative Solutions</div><p>Invented scalable fixes for problems others hadn’t yet fully defined.</p></div></a>
+<a class="popup-link" href="b4.html"><div class="snippet-box"><div class="snippet-icon">🌐</div><div class="snippet-title">Scalable Design</div><p>Built systems that worked for one instructor and scaled to many.</p></div></a>
+</div>
+</div>
+</div>
+<div class="quadrant-row">
+<div class="quadrant">
+<div class="block-grid">
+<a class="popup-link" href="c1.html"><div class="snippet-box"><div class="snippet-icon">📝</div><div class="snippet-title">Faculty Collaboration</div><p>Brought instructors on board through intuitive tools that required no training.</p></div></a>
+<a class="popup-link" href="c2.html"><div class="snippet-box"><div class="snippet-icon">🚦</div><div class="snippet-title">Compliance Simplified</div><p>Met institutional requirements invisibly without disrupting the user experience.</p></div></a>
+<a class="popup-link" href="c3.html"><div class="snippet-box"><div class="snippet-icon">💬</div><div class="snippet-title">Support Systems</div><p>Anticipated learner needs and solved problems before they slowed progress.</p></div></a>
+<a class="popup-link" href="c4.html"><div class="snippet-box"><div class="snippet-icon">🔧</div><div class="snippet-title"> Tool Proficiency</div><p>Hold solid working knowledge of the full instructional design stack, from media to delivery.</p></div></a>
+</div>
+</div>
+<div class="quadrant">
+<div class="block-grid">
+<a class="popup-link" href="d1.html"><div class="snippet-box"><div class="snippet-icon">🌱</div><div class="snippet-title">Relentless Improver</div><p>Piloted, tested, refined. Used feedback to evolve strategies that worked in the wild.</p></div></a>
+<a class="popup-link" href="d2.html"><div class="snippet-box"><div class="snippet-icon">📁</div><div class="snippet-title">Content Sculptor</div><p>Distilled complex ideas into clean structure that accelerated understanding.</p></div></a>
+<a class="popup-link" href="d3.html"><div class="snippet-box"><div class="snippet-icon">🎯</div><div class="snippet-title">Objective Alignment</div><p>Ensured weekly content consistently matched learning goals and outcomes.</p></div></a>
+<a class="popup-link" href="d4.html"><div class="snippet-box"><div class="snippet-icon">🧍‍♀️</div><div class="snippet-title">Instant Impact</div><p>Delivered improvements students and faculty used immediately without training.</p></div></a>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Popup for iframe -->
+<div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
+<div class="modal-content" style="position: relative; width: 600px; max-width: 90%;">
+<button id="close-modal" style="position: absolute; top: 12px; right: 12px; background: #333; color: #fff; border: none; font-size: 20px; cursor: pointer; border-radius: 50%; width: 32px; height: 32px; line-height: 28px; text-align: center; z-index: 10; transition: background 0.3s ease;">×</button>
+<iframe id="modal-frame" style="width: 100%; height: 500px; border: none; border-radius: 12px; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.2);"></iframe>
+</div>
+</div>
+<script>
+    document.querySelectorAll('.popup-link').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const modal = document.getElementById('modal');
+        const frame = document.getElementById('modal-frame');
+        frame.src = this.href;
+        modal.style.display = 'flex';
+      });
+    });
+    document.getElementById('modal').addEventListener('click', function (e) {
+      if (e.target.id === 'modal' || e.target.id === 'close-modal') {
+        this.style.display = 'none';
+        document.getElementById('modal-frame').src = "";
+      }
+    });
+    function setUniformSnippetBoxHeights() {
+      // Reset heights first
+      document.querySelectorAll('.snippet-box').forEach(box => {
+        box.style.height = 'auto';
+      });
+      // Find the tallest
+      let maxHeight = 0;
+      document.querySelectorAll('.snippet-box').forEach(box => {
+        maxHeight = Math.max(maxHeight, box.offsetHeight);
+      });
+      // Set all to the tallest
+      document.querySelectorAll('.snippet-box').forEach(box => {
+        box.style.height = maxHeight + 'px';
+      });
+    }
+    window.addEventListener('load', setUniformSnippetBoxHeights);
+    window.addEventListener('resize', setUniformSnippetBoxHeights);
+  </script>
+</body>
+</html> 
