@@ -4,6 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="description" content="A concise showcase of Julia Flook's instructional design strengths, including systems thinking, interface design, and creative solutions.">
 <! -- Julia Flook -->
 <title>Skills Snapshot</title>
 <style>
@@ -247,6 +248,71 @@
       font-size: 0.95em;
     }
   }
+ 
+  .nav-btn {
+    background: #fff;
+    color: #555;
+    border: 2px solid #7faf08;
+    border-radius: 10px;
+    min-width: 120px;
+    height: 44px;
+    font-size: 18px;
+    font-weight: 400;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    margin: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 18px;
+  }
+  .nav-btn-prev {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+  .nav-btn-next {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+  .chevron {
+    font-size: 1.4em;
+    font-weight: bold;
+    line-height: 1;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 2px;
+  }
+  .chevron-left {
+    margin-right: 8px;
+    margin-left: 0;
+  }
+  .chevron-right {
+    margin-left: 8px;
+    margin-right: 0;
+  }
+  .btn-text {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .nav-btn:hover:not(:disabled), .nav-btn:focus:not(:disabled) {
+    background: #7faf08 !important;
+    color: #fff !important;
+    border-color: #7faf08 !important;
+    outline: none;
+  }
+  .nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #eee !important;
+    color: #bbb !important;
+    border-color: #ccc !important;
+  }
+  .modal-nav-btns {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 </style>
 </head>
 <body>
@@ -322,25 +388,64 @@
 </div>
 <!-- Modal Popup for iframe -->
 <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
-<div class="modal-content" style="position: relative; width: 600px; max-width: 90%;">
+<div class="modal-content" style="position: relative; width: 600px; max-width: 90%; padding-bottom: 24px; display: flex; flex-direction: column; align-items: stretch;">
 <button id="close-modal" style="position: absolute; top: 12px; right: 12px; background: #333; color: #fff; border: none; font-size: 20px; cursor: pointer; border-radius: 50%; width: 32px; height: 32px; line-height: 28px; text-align: center; z-index: 10; transition: background 0.3s ease;">×</button>
 <iframe id="modal-frame" style="width: 100%; height: 500px; border: none; border-radius: 12px; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.2);"></iframe>
+<!-- Navigation buttons inside modal, below iframe -->
+<div class="modal-nav-btns" style="width: 100%; display: flex; justify-content: center; gap: 24px; margin-top: 18px; margin-bottom: 0; position: static;">
+  <button id="prev-btn" class="nav-btn nav-btn-prev"><span class="chevron chevron-left">&#x276E;</span><span class="btn-text">Previous</span></button>
+  <button id="next-btn" class="nav-btn nav-btn-next"><span class="btn-text">Next</span><span class="chevron chevron-right">&#x276F;</span></button>
+</div>
 </div>
 </div>
 <script>
+    // List of popup files in order
+    const popupFiles = [
+      'a1.html','a2.html','a3.html','a4.html',
+      'b1.html','b2.html','b3.html','b4.html',
+      'c1.html','c2.html','c3.html','c4.html',
+      'd1.html','d2.html','d3.html','d4.html'
+    ];
+    let currentPopupIndex = -1;
+    // Add event listeners to snippet links
     document.querySelectorAll('.popup-link').forEach(link => {
       link.addEventListener('click', function (e) {
         e.preventDefault();
         const modal = document.getElementById('modal');
         const frame = document.getElementById('modal-frame');
-        frame.src = this.href;
+        const href = this.getAttribute('href');
+        currentPopupIndex = popupFiles.indexOf(href);
+        frame.src = href;
         modal.style.display = 'flex';
+        updateNavButtons();
       });
     });
+    // Modal close logic
     document.getElementById('modal').addEventListener('click', function (e) {
       if (e.target.id === 'modal' || e.target.id === 'close-modal') {
         this.style.display = 'none';
         document.getElementById('modal-frame').src = "";
+      }
+    });
+    // Navigation button logic
+    function updateNavButtons() {
+      document.getElementById('prev-btn').disabled = (currentPopupIndex <= 0);
+      document.getElementById('next-btn').disabled = (currentPopupIndex >= popupFiles.length - 1);
+    }
+    document.getElementById('prev-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (currentPopupIndex > 0) {
+        currentPopupIndex--;
+        document.getElementById('modal-frame').src = popupFiles[currentPopupIndex];
+        updateNavButtons();
+      }
+    });
+    document.getElementById('next-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (currentPopupIndex < popupFiles.length - 1) {
+        currentPopupIndex++;
+        document.getElementById('modal-frame').src = popupFiles[currentPopupIndex];
+        updateNavButtons();
       }
     });
     function setUniformSnippetBoxHeights() {
